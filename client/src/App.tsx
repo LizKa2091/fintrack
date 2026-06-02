@@ -5,4 +5,4 @@ const App: FC = () => {
    return <h1>Fintrack</h1>
 }
 
-export default App;
+export default App
