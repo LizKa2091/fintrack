@@ -1,8 +1,12 @@
 import { type FC } from 'react'
-import './App.css'
 
 const App: FC = () => {
-   return <h1>Fintrack</h1>
+   return (
+      <div style={{ fontFamily: 'sans-serif', padding: '40px', textAlign: 'center' }}>
+         <h1>FinTrack</h1>
+         <p>Сервис для учёта личных финансов</p>
+      </div>
+   )
 }
 
 export default App
