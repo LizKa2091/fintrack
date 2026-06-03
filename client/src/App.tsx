@@ -1,21 +1,30 @@
-import styles from './App.module.scss'
-import { type FC } from 'react'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { Layout } from '@/components/Layout/Layout'
+import { Dashboard } from '@/pages/Dashboard/Dashboard'
+import { Transactions } from '@/pages/Transactions/Transactions'
+import { Auth } from '@/pages/Auth/Auth'
 
-const App: FC = () => {
-   return (
-      <div className={styles.container}>
-         <header className={styles.header}>
-            <h1>
-               FinTrack
-            </h1>
-            <p>Сервис для учёта личных финансов</p>
-         </header>
+const router = createBrowserRouter([
+   {
+      path: '/',
+      element: <Layout />,
+      children: [
+         {
+            index: true,
+            element: <Dashboard />,
+         },
+         {
+            path: 'transactions',
+            element: <Transactions />,
+         },
+      ],
+   },
+   {
+      path: '/auth',
+      element: <Auth />,
+   },
+])
 
-         <main className={styles.dashboardMock}>
-            <h2>Добро пожаловать в панель управления</h2>
-         </main>
-      </div>
-   )
+export const App = () => {
+   return <RouterProvider router={router} />
 }
-
-export default App
