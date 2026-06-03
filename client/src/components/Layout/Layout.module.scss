@@ -1,0 +1,30 @@
+.layout {
+   display: flex;
+   min-height: 100vh;
+}
+
+.sidebar {
+   width: 250px;
+   background: var(--surface-color);
+   border-right: 1px solid var(--text-muted);
+   padding: 24px;
+   display: flex;
+   flex-direction: column;
+   gap: 20px;
+
+   a {
+      padding: 10px 14px;
+      border-radius: $radius-sm;
+      transition: $transition-base;
+
+      &:hover {
+         background: rgba($color-primary, 0.1);
+         color: var(--primary-color);
+      }
+   }
+}
+
+.content {
+   flex: 1;
+   background: var(--bg-color);
+}
