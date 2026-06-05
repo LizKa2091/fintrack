@@ -15,6 +15,12 @@ export const transactionsController = {
    createTransaction: async (req: Request, res: Response) => {
       try {
          const { title, amount, type, category } = req.body
+         
+         const userId = (req as any).user?.userId 
+
+         if (!userId) {
+            return res.status(401).json({ error: 'Не забудь залогиниться' })
+         }
 
          if (!title || !amount || !type || !category) {
             return res.status(400).json({ error: 'Все поля обязательны для заполнения' })
@@ -25,11 +31,13 @@ export const transactionsController = {
             amount: Number(amount),
             type,
             category,
+            userId,
          })
 
          res.status(201).json(newTransaction)
       } 
       catch (error) {
+         console.error('[Create Transaction Error]:', error)
          res.status(500).json({ error: 'Ошибка при создании транстанции' })
       }
    },
