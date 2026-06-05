@@ -9,13 +9,14 @@ export const transactionsService = {
       })
    },
 
-   create: async (data: { title: string; amount: number; type: string; category: string }) => {
+   create: async (data: { title: string; amount: number; type: string; category: string; userId: string }) => {
       return await prisma.transaction.create({
          data: {
-         title: data.title,
-         amount: data.amount,
-         type: data.type,
-         category: data.category,
+            title: data.title,
+            amount: data.amount,
+            type: data.type,
+            category: data.category,
+            userId: data.userId,
          },
       })
    },
