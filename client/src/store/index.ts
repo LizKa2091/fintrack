@@ -5,7 +5,7 @@ import authReducer from './slices/authSlice.ts'
 export const store = configureStore({
    reducer: {
       transactions: transactionsReducer,
-      auth: authReducer
+      auth: authReducer,
    },
 })
 

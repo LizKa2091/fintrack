@@ -29,8 +29,7 @@ export const loginUser = createAsyncThunk(
 
          localStorage.setItem('token', response.data.token)
          return response.data
-      } 
-      catch (error: any) {
+      } catch (error: any) {
          return thunkAPI.rejectWithValue(
             error.response?.data?.message || 'Ошибка при входе в аккаунт'
          )
@@ -44,11 +43,8 @@ export const registerUser = createAsyncThunk(
       try {
          const response = await api.post('/auth/register', userData)
          return response.data
-      } 
-      catch (error: any) {
-         return thunkAPI.rejectWithValue(
-            error.response?.data?.message || 'Ошибка при регистрации'
-         )
+      } catch (error: any) {
+         return thunkAPI.rejectWithValue(error.response?.data?.message || 'Ошибка при регистрации')
       }
    }
 )
@@ -73,11 +69,14 @@ const authSlice = createSlice({
             state.isLoading = true
             state.error = null
          })
-         .addCase(loginUser.fulfilled, (state, action: PayloadAction<{ user: User; token: string }>) => {
-            state.isLoading = false
-            state.user = action.payload.user
-            state.token = action.payload.token
-         })
+         .addCase(
+            loginUser.fulfilled,
+            (state, action: PayloadAction<{ user: User; token: string }>) => {
+               state.isLoading = false
+               state.user = action.payload.user
+               state.token = action.payload.token
+            }
+         )
          .addCase(loginUser.rejected, (state, action) => {
             state.isLoading = false
             state.error = action.payload as string
