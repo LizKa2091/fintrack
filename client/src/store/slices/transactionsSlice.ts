@@ -97,4 +97,26 @@ const transactionsSlice = createSlice({
    },
 })
 
+export const selectExpensesByCategory = (state: { transactions: TransactionsState }) => {
+   const transactions = state.transactions.items
+   const expenses = transactions.filter((t) => t.type === 'expense')
+   const totalExpense = expenses.reduce((sum, t) => sum + t.amount, 0)
+
+   const categoriesMap: Record<string, number> = {}
+   expenses.forEach((t) => {
+      if (!categoriesMap[t.category]) {
+         categoriesMap[t.category] = 0
+      }
+      categoriesMap[t.category] += t.amount
+   })
+
+   return Object.entries(categoriesMap)
+      .map(([category, amount]) => ({
+         category,
+         amount,
+         percentage: totalExpense > 0 ? Math.round((amount / totalExpense) * 100) : 0,
+      }))
+      .sort((a, b) => b.amount - a.amount)
+}
+
 export const transactionsReducer = transactionsSlice.reducer
