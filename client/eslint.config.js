@@ -16,7 +16,6 @@ export default tseslint.config(
       ],
       files: ['**/*.{ts,tsx}'],
       languageOptions: {
-         fontSize: 20,
          ecmaVersion: 2020,
          globals: globals.browser,
       },
