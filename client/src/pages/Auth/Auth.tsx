@@ -15,6 +15,8 @@ export const Auth = () => {
    const [password, setPassword] = useState('')
    const [name, setName] = useState('')
 
+   const [successMessage, setSuccessMessage] = useState(false)
+
    useEffect(() => {
       if (token) {
          navigate('/')
@@ -23,6 +25,7 @@ export const Auth = () => {
 
    const switchModeHandler = () => {
       setIsLoginMode((prev) => !prev)
+      setSuccessMessage(false)
       dispatch(clearError())
    }
 
@@ -33,7 +36,13 @@ export const Auth = () => {
       if (isLoginMode) {
          dispatch(loginUser({ email, password }))
       } else {
-         dispatch(registerUser({ email, password, name }))
+         const resultAction = await dispatch(registerUser({ email, password, name }))
+
+         if (registerUser.fulfilled.match(resultAction)) {
+            setSuccessMessage(true)
+            setIsLoginMode(true)
+            setPassword('')
+         }
       }
    }
 
@@ -50,6 +59,20 @@ export const Auth = () => {
          <h1>{isLoginMode ? 'Вход в систему' : 'Регистрация'}</h1>
 
          {error && <p style={{ color: 'red', marginBottom: '16px' }}>{error}</p>}
+
+         {successMessage && (
+            <p
+               style={{
+                  color: 'green',
+                  backgroundColor: '#e6f4ea',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  marginBottom: '16px',
+               }}
+            >
+               Вы успешно зарегистрировались! Используйте свои данные для входа.
+            </p>
+         )}
 
          <form
             onSubmit={submitHandler}

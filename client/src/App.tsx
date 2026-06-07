@@ -4,6 +4,10 @@ import { Dashboard } from '@/pages/Dashboard/Dashboard'
 import { Transactions } from '@/pages/Transactions/Transactions'
 import { Auth } from '@/pages/Auth/Auth'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { useDispatch } from 'react-redux'
+import type { AppDispatch } from './store'
+import { useEffect } from 'react'
+import { checkAuth } from './store/slices/authSlice'
 
 const router = createBrowserRouter([
    {
@@ -31,5 +35,11 @@ const router = createBrowserRouter([
 ])
 
 export const App = () => {
+   const dispatch = useDispatch<AppDispatch>()
+
+   useEffect(() => {
+      dispatch(checkAuth())
+   }, [dispatch])
+
    return <RouterProvider router={router} />
 }

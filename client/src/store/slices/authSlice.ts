@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit'
+import { AxiosError } from 'axios'
 import api from '../../api/axiosInstance.js'
 
 interface User {
@@ -14,6 +15,10 @@ interface AuthState {
    error: string | null
 }
 
+interface BackendErrorResponse {
+   message?: string
+}
+
 const initialState: AuthState = {
    user: null,
    token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
@@ -23,15 +28,15 @@ const initialState: AuthState = {
 
 export const loginUser = createAsyncThunk(
    'auth/login',
-   async (credentials: { email: string; password: Required<string> }, thunkAPI) => {
+   async (credentials: { email: string; password: string }, thunkAPI) => {
       try {
          const response = await api.post('/auth/login', credentials)
-
          localStorage.setItem('token', response.data.token)
          return response.data
-      } catch (error: any) {
+      } catch (error) {
+         const err = error as AxiosError<BackendErrorResponse>
          return thunkAPI.rejectWithValue(
-            error.response?.data?.message || 'Ошибка при входе в аккаунт'
+            err.response?.data?.message || 'Ошибка при входе в аккаунт'
          )
       }
    }
@@ -39,15 +44,35 @@ export const loginUser = createAsyncThunk(
 
 export const registerUser = createAsyncThunk(
    'auth/register',
-   async (userData: { email: string; password: Required<string>; name?: string }, thunkAPI) => {
+   async (userData: { email: string; password: string; name?: string }, thunkAPI) => {
       try {
          const response = await api.post('/auth/register', userData)
          return response.data
-      } catch (error: any) {
-         return thunkAPI.rejectWithValue(error.response?.data?.message || 'Ошибка при регистрации')
+      } catch (error) {
+         const err = error as AxiosError<BackendErrorResponse>
+         return thunkAPI.rejectWithValue(err.response?.data?.message || 'Ошибка при регистрации')
       }
    }
 )
+
+export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, thunkAPI) => {
+   try {
+      const token = localStorage.getItem('token')
+      if (!token) return thunkAPI.rejectWithValue('No token found')
+
+      const response = await api.get('/auth/me', {
+         headers: {
+            Authorization: `Bearer ${token}`,
+         },
+      })
+
+      return { user: response.data.user, token }
+   } catch (error) {
+      const err = error as AxiosError<BackendErrorResponse>
+      localStorage.removeItem('token')
+      return thunkAPI.rejectWithValue(err.response?.data?.message || 'Session expired')
+   }
+})
 
 const authSlice = createSlice({
    name: 'auth',
@@ -91,6 +116,23 @@ const authSlice = createSlice({
          .addCase(registerUser.rejected, (state, action) => {
             state.isLoading = false
             state.error = action.payload as string
+         })
+         .addCase(checkAuth.pending, (state) => {
+            state.isLoading = true
+            state.error = null
+         })
+         .addCase(
+            checkAuth.fulfilled,
+            (state, action: PayloadAction<{ user: User; token: string }>) => {
+               state.isLoading = false
+               state.user = action.payload.user
+               state.token = action.payload.token
+            }
+         )
+         .addCase(checkAuth.rejected, (state) => {
+            state.isLoading = false
+            state.user = null
+            state.token = null
          })
    },
 })
