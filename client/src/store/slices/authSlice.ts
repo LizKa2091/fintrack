@@ -60,11 +60,7 @@ export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, thunkAPI) 
       const token = localStorage.getItem('token')
       if (!token) return thunkAPI.rejectWithValue('No token found')
 
-      const response = await api.get('/auth/me', {
-         headers: {
-            Authorization: `Bearer ${token}`,
-         },
-      })
+      const response = await api.get('/auth/me')
 
       return { user: response.data.user, token }
    } catch (error) {
