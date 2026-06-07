@@ -1,19 +1,18 @@
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { fetchTransactions } from '@/store/slices/transactionsSlice'
+import { fetchTransactions, selectExpensesByCategory } from '@/store/slices/transactionsSlice'
 import styles from './Dashboard.module.scss'
 
 export const Dashboard = () => {
    const dispatch = useAppDispatch()
 
-   // 1. Забираем не только элементы, но и флаг загрузки
    const { items: transactions, isLoading } = useAppSelector((state) => state.transactions)
+   const categoriesData = useAppSelector(selectExpensesByCategory)
 
    useEffect(() => {
       dispatch(fetchTransactions())
    }, [dispatch])
 
-   // Считаем доходы и расходы
    const totalIncome = transactions
       .filter((t) => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0)
@@ -22,14 +21,11 @@ export const Dashboard = () => {
       .filter((t) => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0)
 
-   // 2. Берем только 5 самых свежих транзакций для вывода на главную
    const recentTransactions = transactions.slice(0, 5)
 
-   // 3. Если данные еще грузятся — показываем красивый экран загрузки
    if (isLoading) {
       return (
          <div
-            className={styles.loadingWrapper}
             style={{
                display: 'flex',
                justifyContent: 'center',
@@ -47,7 +43,6 @@ export const Dashboard = () => {
    return (
       <div className={styles.wrapper}>
          <h1>Панель управления</h1>
-
          <div style={{ display: 'flex', gap: '20px', margin: '20px 0' }}>
             <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', flex: 1 }}>
                <h3>Доходы</h3>
@@ -63,11 +58,65 @@ export const Dashboard = () => {
             </div>
          </div>
 
+         <div
+            style={{ background: '#fff', padding: '24px', borderRadius: '8px', margin: '24px 0' }}
+         >
+            <h2>Статистика расходов по категориям</h2>
+            {categoriesData.length === 0 ? (
+               <p style={{ color: 'var(--text-muted)' }}>Нет данных для анализа расходов.</p>
+            ) : (
+               <div
+                  style={{
+                     display: 'flex',
+                     flexDirection: 'column',
+                     gap: '16px',
+                     marginTop: '16px',
+                  }}
+               >
+                  {categoriesData.map((item) => (
+                     <div key={item.category}>
+                        <div
+                           style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              marginBottom: '6px',
+                              fontSize: '14px',
+                           }}
+                        >
+                           <span>
+                              <strong>{item.category}</strong> — {item.percentage}%
+                           </span>
+                           <span style={{ color: 'var(--text-muted)' }}>
+                              {item.amount.toLocaleString()} ₽
+                           </span>
+                        </div>
+                        <div
+                           style={{
+                              width: '100%',
+                              height: '10px',
+                              backgroundColor: '#eef2f5',
+                              borderRadius: '5px',
+                              overflow: 'hidden',
+                           }}
+                        >
+                           <div
+                              style={{
+                                 width: `${item.percentage}%`,
+                                 height: '100%',
+                                 backgroundColor: '#0070f3',
+                                 transition: 'width 0.3s ease',
+                              }}
+                           />
+                        </div>
+                     </div>
+                  ))}
+               </div>
+            )}
+         </div>
+
          <h2>Последние операции:</h2>
          {recentTransactions.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)' }}>
-               Операций пока нет. Перейдите во вкладку транзакций, чтобы добавить первую!
-            </p>
+            <p style={{ color: 'var(--text-muted)' }}>Операций пока нет.</p>
          ) : (
             <ul style={{ listStyle: 'none', padding: 0 }}>
                {recentTransactions.map((t) => (
