@@ -1,10 +1,6 @@
 import { useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import {
-   addTransaction,
-   deleteTransaction,
-   type Transaction,
-} from '@/store/slices/transactionsSlice'
+import { createTransactionThunk, deleteTransactionThunk } from '@/store/slices/transactionsSlice'
 import styles from './Transactions.module.scss'
 
 export const Transactions = () => {
@@ -16,21 +12,19 @@ export const Transactions = () => {
    const [type, setType] = useState<'income' | 'expense'>('expense')
    const [category, setCategory] = useState('Продукты')
 
-   const handleSubmit = (e) => {
+   const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault()
 
       if (!title.trim() || !amount || Number(amount) <= 0) return
 
-      const newTransaction: Transaction = {
-         id: crypto.randomUUID(),
-         title: title.trim(),
-         amount: Number(amount),
-         type,
-         category,
-         date: new Date().toISOString().split('T')[0],
-      }
-
-      dispatch(addTransaction(newTransaction))
+      dispatch(
+         createTransactionThunk({
+            title: title.trim(),
+            amount: Number(amount),
+            type,
+            category,
+         })
+      )
 
       setTitle('')
       setAmount('')
@@ -119,7 +113,7 @@ export const Transactions = () => {
                         </span>
                         <button
                            className={styles.deleteBtn}
-                           onClick={() => dispatch(deleteTransaction(t.id))}
+                           onClick={() => dispatch(deleteTransactionThunk(t.id))}
                            title='Удалить транзакцию'
                         >
                            x
