@@ -1,18 +1,25 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import type { AppDispatch, RootState } from '../../store'
-import { loginUser, registerUser, clearError } from '../../store/slices/authSlice.ts'
+import { loginUser, registerUser, clearError } from '../../store/slices/authSlice.js'
 
 export const Auth = () => {
    const dispatch = useDispatch<AppDispatch>()
+   const navigate = useNavigate()
 
-   const { isLoading, error } = useSelector((state: RootState) => state.auth)
+   const { isLoading, error, token } = useSelector((state: RootState) => state.auth)
 
    const [isLoginMode, setIsLoginMode] = useState(true)
-
    const [email, setEmail] = useState('')
    const [password, setPassword] = useState('')
    const [name, setName] = useState('')
+
+   useEffect(() => {
+      if (token) {
+         navigate('/')
+      }
+   }, [token, navigate])
 
    const switchModeHandler = () => {
       setIsLoginMode((prev) => !prev)
@@ -21,7 +28,6 @@ export const Auth = () => {
 
    const submitHandler = async (e: React.FormEvent) => {
       e.preventDefault()
-
       if (!email || !password) return
 
       if (isLoginMode) {

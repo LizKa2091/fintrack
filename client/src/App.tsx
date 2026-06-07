@@ -3,11 +3,16 @@ import { Layout } from '@/components/Layout/Layout'
 import { Dashboard } from '@/pages/Dashboard/Dashboard'
 import { Transactions } from '@/pages/Transactions/Transactions'
 import { Auth } from '@/pages/Auth/Auth'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 const router = createBrowserRouter([
    {
       path: '/',
-      element: <Layout />,
+      element: (
+         <ProtectedRoute>
+            <Layout />
+         </ProtectedRoute>
+      ),
       children: [
          {
             index: true,
