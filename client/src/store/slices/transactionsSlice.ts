@@ -20,6 +20,9 @@ interface TransactionsState {
    items: Transaction[]
    isLoading: boolean
    error: string | null
+   currentPage: number
+   hasMore: boolean
+   total: number
 }
 
 interface BackendErrorResponse {
@@ -30,19 +33,28 @@ const initialState: TransactionsState = {
    items: [],
    isLoading: false,
    error: null,
+   currentPage: 1,
+   hasMore: false,
+   total: 0,
 }
 
-export const fetchTransactions = createAsyncThunk('transactions/fetchAll', async (_, thunkAPI) => {
-   try {
-      const response = await api.get('/transactions')
-      return response.data
-   } catch (error) {
-      const err = error as AxiosError<BackendErrorResponse>
-      return thunkAPI.rejectWithValue(
-         err.response?.data?.error || 'Не удалось загрузить транзакции'
-      )
+export const fetchTransactions = createAsyncThunk(
+   'transactions/fetchAll',
+   async (params: { page: number; limit: number } | undefined, thunkAPI) => {
+      try {
+         const page = params?.page || 1
+         const limit = params?.limit || 10
+
+         const response = await api.get(`/transactions?page=${page}&limit=${limit}`)
+         return response.data
+      } catch (error) {
+         const err = error as AxiosError<BackendErrorResponse>
+         return thunkAPI.rejectWithValue(
+            err.response?.data?.error || 'Не удалось загрузить транзакции'
+         )
+      }
    }
-})
+)
 
 export const createTransactionThunk = createAsyncThunk(
    'transactions/create',
@@ -85,16 +97,33 @@ export const deleteTransactionThunk = createAsyncThunk(
 const transactionsSlice = createSlice({
    name: 'transactions',
    initialState,
-   reducers: {},
+   reducers: {
+      resetPagination: (state) => {
+         state.items = []
+         state.currentPage = 1
+         state.hasMore = false
+      },
+   },
    extraReducers: (builder) => {
       builder
          .addCase(fetchTransactions.pending, (state) => {
             state.isLoading = true
             state.error = null
          })
-         .addCase(fetchTransactions.fulfilled, (state, action: PayloadAction<Transaction[]>) => {
+         .addCase(fetchTransactions.fulfilled, (state, action) => {
             state.isLoading = false
-            state.items = action.payload
+
+            const { items, total, page, hasMore } = action.payload
+
+            if (page === 1) {
+               state.items = items
+            } else {
+               state.items = [...state.items, ...items]
+            }
+
+            state.total = total
+            state.currentPage = page
+            state.hasMore = hasMore
          })
          .addCase(fetchTransactions.rejected, (state, action) => {
             state.isLoading = false
@@ -103,12 +132,18 @@ const transactionsSlice = createSlice({
 
          .addCase(createTransactionThunk.fulfilled, (state, action: PayloadAction<Transaction>) => {
             state.items.unshift(action.payload)
+            state.total += 1
          })
+
          .addCase(deleteTransactionThunk.fulfilled, (state, action: PayloadAction<string>) => {
-            state.items = state.items.filter((item) => item.id !== action.payload)
+            state.items = state.items.filter((t) => t.id !== action.payload)
+            state.total -= 1
          })
    },
 })
+
+export const { resetPagination } = transactionsSlice.actions
+export const transactionsReducer = transactionsSlice.reducer
 
 export const selectExpensesByCategory = (state: { transactions: TransactionsState }) => {
    const transactions = state.transactions.items
@@ -117,10 +152,12 @@ export const selectExpensesByCategory = (state: { transactions: TransactionsStat
 
    const categoriesMap: Record<string, number> = {}
    expenses.forEach((t) => {
-      if (!categoriesMap[t.category.name]) {
+      if (t.category && !categoriesMap[t.category.name]) {
          categoriesMap[t.category.name] = 0
       }
-      categoriesMap[t.category.name] += t.amount
+      if (t.category) {
+         categoriesMap[t.category.name] += t.amount
+      }
    })
 
    return Object.entries(categoriesMap)
@@ -131,5 +168,3 @@ export const selectExpensesByCategory = (state: { transactions: TransactionsStat
       }))
       .sort((a, b) => b.amount - a.amount)
 }
-
-export const transactionsReducer = transactionsSlice.reducer

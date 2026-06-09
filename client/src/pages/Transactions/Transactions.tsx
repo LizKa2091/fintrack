@@ -1,12 +1,23 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { createTransactionThunk, deleteTransactionThunk } from '@/store/slices/transactionsSlice'
+import {
+   createTransactionThunk,
+   deleteTransactionThunk,
+   fetchTransactions,
+} from '@/store/slices/transactionsSlice'
 import { fetchCategories, createCategoryThunk } from '@/store/slices/categoriesSlice'
 import styles from './Transactions.module.scss'
 
 export const Transactions = () => {
    const dispatch = useAppDispatch()
-   const { items: transactions } = useAppSelector((state) => state.transactions)
+
+   const {
+      items: transactions,
+      isLoading,
+      currentPage,
+      hasMore,
+      total,
+   } = useAppSelector((state) => state.transactions)
    const { items: categories } = useAppSelector((state) => state.categories)
 
    const [title, setTitle] = useState('')
@@ -18,6 +29,7 @@ export const Transactions = () => {
    const [categoryType, setCategoryType] = useState<'income' | 'expense'>('expense')
 
    useEffect(() => {
+      dispatch(fetchTransactions({ page: 1, limit: 10 }))
       dispatch(fetchCategories())
    }, [dispatch])
 
@@ -31,6 +43,11 @@ export const Transactions = () => {
       setType(newType)
       const nextCategories = categories.filter((c) => c.type === newType)
       setCategoryId(nextCategories[0]?.id ?? '')
+   }
+
+   const handleLoadMore = () => {
+      if (isLoading || !hasMore) return
+      dispatch(fetchTransactions({ page: currentPage + 1, limit: 10 }))
    }
 
    const handleTransactionSubmit = (e: React.FormEvent) => {
@@ -176,32 +193,48 @@ export const Transactions = () => {
          </div>
 
          <section className={styles.history}>
-            <h2>История операций ({transactions.length})</h2>
+            <h2>
+               История операций ({transactions.length} из {total})
+            </h2>
             {transactions.length === 0 ? (
                <p style={{ color: 'var(--text-muted)' }}>Операций пока нет. Добавьте первую!</p>
             ) : (
-               transactions.map((t) => (
-                  <div key={t.id} className={`${styles.card} ${styles[t.type]}`}>
-                     <div className={styles.cardInfo}>
-                        <h4>{t.title}</h4>
-                        <span>
-                           {t.category?.name || 'Без категории'} • {t.date?.split('T')[0]}
-                        </span>
-                     </div>
-                     <div className={styles.cardRight}>
-                        <span className={`${styles.amount} ${styles[t.type]}`}>
-                           {t.type === 'income' ? '+' : '-'} {t.amount.toLocaleString()} ₽
-                        </span>
-                        <button
-                           className={styles.deleteBtn}
-                           onClick={() => dispatch(deleteTransactionThunk(t.id))}
-                           title='Удалить транзакцию'
-                        >
-                           x
-                        </button>
-                     </div>
+               <>
+                  <div className={styles.listWrapper}>
+                     {transactions.map((t) => (
+                        <div key={t.id} className={`${styles.card} ${styles[t.type]}`}>
+                           <div className={styles.cardInfo}>
+                              <h4>{t.title}</h4>
+                              <span>
+                                 {t.category?.name || 'Без категории'} • {t.date?.split('T')[0]}
+                              </span>
+                           </div>
+                           <div className={styles.cardRight}>
+                              <span className={`${styles.amount} ${styles[t.type]}`}>
+                                 {t.type === 'income' ? '+' : '-'} {t.amount.toLocaleString()} ₽
+                              </span>
+                              <button
+                                 className={styles.deleteBtn}
+                                 onClick={() => dispatch(deleteTransactionThunk(t.id))}
+                                 title='Удалить транзакцию'
+                              >
+                                 x
+                              </button>
+                           </div>
+                        </div>
+                     ))}
                   </div>
-               ))
+
+                  {hasMore && (
+                     <button
+                        className={styles.loadMoreBtn}
+                        onClick={handleLoadMore}
+                        disabled={isLoading}
+                     >
+                        {isLoading ? 'Загрузка...' : 'Показать еще'}
+                     </button>
+                  )}
+               </>
             )}
          </section>
       </div>
