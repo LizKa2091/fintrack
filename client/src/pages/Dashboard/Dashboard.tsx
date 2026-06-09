@@ -10,7 +10,7 @@ export const Dashboard = () => {
    const categoriesData = useAppSelector(selectExpensesByCategory)
 
    useEffect(() => {
-      dispatch(fetchTransactions())
+      dispatch(fetchTransactions({ page: 1, limit: 20 }))
    }, [dispatch])
 
    const totalIncome = transactions
