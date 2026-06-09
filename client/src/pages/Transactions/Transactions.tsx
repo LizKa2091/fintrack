@@ -28,6 +28,9 @@ export const Transactions = () => {
    const [newCategoryName, setNewCategoryName] = useState('')
    const [categoryType, setCategoryType] = useState<'income' | 'expense'>('expense')
 
+   const [searchQuery, setSearchQuery] = useState('')
+   const [activeTab, setActiveTab] = useState<'all' | 'income' | 'expense'>('all')
+
    useEffect(() => {
       dispatch(fetchTransactions({ page: 1, limit: 10 }))
       dispatch(fetchCategories())
@@ -50,9 +53,20 @@ export const Transactions = () => {
       dispatch(fetchTransactions({ page: currentPage + 1, limit: 10 }))
    }
 
+   const displayedTransactions = useMemo(() => {
+      return transactions.filter((t) => {
+         const matchesTab = activeTab === 'all' || t.type === activeTab
+
+         const matchesSearch =
+            t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (t.category?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
+
+         return matchesTab && matchesSearch
+      })
+   }, [transactions, activeTab, searchQuery])
+
    const handleTransactionSubmit = (e: React.FormEvent) => {
       e.preventDefault()
-
       if (!title.trim() || !amount || Number(amount) <= 0 || !currentCategoryId) {
          alert('Пожалуйста, заполните все поля и выберите категорию')
          return
@@ -196,12 +210,45 @@ export const Transactions = () => {
             <h2>
                История операций ({transactions.length} из {total})
             </h2>
-            {transactions.length === 0 ? (
-               <p style={{ color: 'var(--text-muted)' }}>Операций пока нет. Добавьте первую!</p>
+            <div className={styles.filterBar}>
+               <input
+                  type='text'
+                  className={styles.searchInput}
+                  placeholder='Поиск по названию или категории...'
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+               />
+
+               <div className={styles.tabs}>
+                  <button
+                     className={`${styles.tabBtn} ${activeTab === 'all' ? styles.activeTab : ''}`}
+                     onClick={() => setActiveTab('all')}
+                  >
+                     Все
+                  </button>
+                  <button
+                     className={`${styles.tabBtn} ${activeTab === 'income' ? styles.activeTab : ''}`}
+                     onClick={() => setActiveTab('income')}
+                  >
+                     Доходы
+                  </button>
+                  <button
+                     className={`${styles.tabBtn} ${activeTab === 'expense' ? styles.activeTab : ''}`}
+                     onClick={() => setActiveTab('expense')}
+                  >
+                     Расходы
+                  </button>
+               </div>
+            </div>
+
+            {displayedTransactions.length === 0 ? (
+               <p style={{ color: 'var(--text-muted)', marginTop: '20px' }}>
+                  Ничего не найдено по заданным фильтрам.
+               </p>
             ) : (
                <>
                   <div className={styles.listWrapper}>
-                     {transactions.map((t) => (
+                     {displayedTransactions.map((t) => (
                         <div key={t.id} className={`${styles.card} ${styles[t.type]}`}>
                            <div className={styles.cardInfo}>
                               <h4>{t.title}</h4>
