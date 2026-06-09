@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { fetchTransactions, selectExpensesByCategory } from '@/store/slices/transactionsSlice'
+import { ExpensesChart } from './components/ExpensesChart'
 import styles from './Dashboard.module.scss'
 
 export const Dashboard = () => {
@@ -43,6 +44,7 @@ export const Dashboard = () => {
    return (
       <div className={styles.wrapper}>
          <h1>Панель управления</h1>
+
          <div style={{ display: 'flex', gap: '20px', margin: '20px 0' }}>
             <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', flex: 1 }}>
                <h3>Доходы</h3>
@@ -63,53 +65,70 @@ export const Dashboard = () => {
          >
             <h2>Статистика расходов по категориям</h2>
             {categoriesData.length === 0 ? (
-               <p style={{ color: 'var(--text-muted)' }}>Нет данных для анализа расходов.</p>
+               <p style={{ color: 'var(--text-muted)', marginTop: '10px' }}>
+                  Нет данных для анализа расходов.
+               </p>
             ) : (
                <div
                   style={{
                      display: 'flex',
-                     flexDirection: 'column',
-                     gap: '16px',
-                     marginTop: '16px',
+                     flexDirection: 'row',
+                     flexWrap: 'wrap',
+                     gap: '40px',
+                     marginTop: '20px',
+                     alignItems: 'center',
                   }}
                >
-                  {categoriesData.map((item) => (
-                     <div key={item.category}>
-                        <div
-                           style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              marginBottom: '6px',
-                              fontSize: '14px',
-                           }}
-                        >
-                           <span>
-                              <strong>{item.category}</strong> — {item.percentage}%
-                           </span>
-                           <span style={{ color: 'var(--text-muted)' }}>
-                              {item.amount.toLocaleString()} ₽
-                           </span>
-                        </div>
-                        <div
-                           style={{
-                              width: '100%',
-                              height: '10px',
-                              backgroundColor: '#eef2f5',
-                              borderRadius: '5px',
-                              overflow: 'hidden',
-                           }}
-                        >
+                  <div style={{ flex: '1 1 300px' }}>
+                     <ExpensesChart data={categoriesData} />
+                  </div>
+
+                  <div
+                     style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '16px',
+                        flex: '1 1 400px',
+                     }}
+                  >
+                     {categoriesData.map((item) => (
+                        <div key={item.category}>
                            <div
                               style={{
-                                 width: `${item.percentage}%`,
-                                 height: '100%',
-                                 backgroundColor: '#0070f3',
-                                 transition: 'width 0.3s ease',
+                                 display: 'flex',
+                                 justifyContent: 'space-between',
+                                 marginBottom: '6px',
+                                 fontSize: '14px',
                               }}
-                           />
+                           >
+                              <span>
+                                 <strong>{item.category}</strong> — {item.percentage}%
+                              </span>
+                              <span style={{ color: 'var(--text-muted)' }}>
+                                 {item.amount.toLocaleString()} ₽
+                              </span>
+                           </div>
+                           <div
+                              style={{
+                                 width: '100%',
+                                 height: '10px',
+                                 backgroundColor: '#eef2f5',
+                                 borderRadius: '5px',
+                                 overflow: 'hidden',
+                              }}
+                           >
+                              <div
+                                 style={{
+                                    width: `${item.percentage}%`,
+                                    height: '100%',
+                                    backgroundColor: '#0070f3',
+                                    transition: 'width 0.3s ease',
+                                 }}
+                              />
+                           </div>
                         </div>
-                     </div>
-                  ))}
+                     ))}
+                  </div>
                </div>
             )}
          </div>
@@ -141,7 +160,7 @@ export const Dashboard = () => {
                               marginLeft: '10px',
                            }}
                         >
-                           ({t.category?.name})
+                           ({t.category?.name || 'Без категории'})
                         </span>
                      </div>
                      <strong
