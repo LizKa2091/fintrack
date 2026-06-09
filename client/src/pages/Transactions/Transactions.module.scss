@@ -5,11 +5,6 @@
    display: grid;
    grid-template-columns: 350px 1fr;
    gap: 32px;
-
-   @include tablet {
-      grid-template-columns: 1fr;
-      padding: 16px;
-   }
 }
 
 .panel {
@@ -138,5 +133,31 @@
    &:hover {
       color: var(--error-color);
       background: rgba($color-error, 0.1);
+   }
+}
+
+.loadMoreBtn {
+   display: block;
+   width: 100%;
+   margin-top: 20px;
+   padding: 12px;
+   background: transparent;
+   border: 2px dashed var(--border-color, #333);
+   color: var(--text-color, #fff);
+   border-radius: 8px;
+   font-weight: 600;
+   cursor: pointer;
+   transition: all 0.2s ease;
+   text-align: center;
+
+   &:hover:not(:disabled) {
+      border-color: var(--accent-color, #4caf50);
+      color: var(--accent-color, #4caf50);
+      background: rgba(76, 175, 80, 0.05);
+   }
+
+   &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
    }
 }
