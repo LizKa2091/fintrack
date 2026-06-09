@@ -7,8 +7,13 @@ export interface Transaction {
    title: string
    amount: number
    type: 'income' | 'expense'
-   category: string
    date: string
+   categoryId: string
+   category: {
+      id: string
+      name: string
+      type: 'income' | 'expense'
+   }
 }
 
 interface TransactionsState {
@@ -41,7 +46,15 @@ export const fetchTransactions = createAsyncThunk('transactions/fetchAll', async
 
 export const createTransactionThunk = createAsyncThunk(
    'transactions/create',
-   async (transactionData: Omit<Transaction, 'id' | 'date'>, thunkAPI) => {
+   async (
+      transactionData: {
+         title: string
+         amount: number
+         type: 'income' | 'expense'
+         categoryId: string
+      },
+      thunkAPI
+   ) => {
       try {
          const response = await api.post('/transactions', transactionData)
          return response.data
@@ -104,10 +117,10 @@ export const selectExpensesByCategory = (state: { transactions: TransactionsStat
 
    const categoriesMap: Record<string, number> = {}
    expenses.forEach((t) => {
-      if (!categoriesMap[t.category]) {
-         categoriesMap[t.category] = 0
+      if (!categoriesMap[t.category.name]) {
+         categoriesMap[t.category.name] = 0
       }
-      categoriesMap[t.category] += t.amount
+      categoriesMap[t.category.name] += t.amount
    })
 
    return Object.entries(categoriesMap)

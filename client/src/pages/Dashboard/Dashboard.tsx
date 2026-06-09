@@ -141,7 +141,7 @@ export const Dashboard = () => {
                               marginLeft: '10px',
                            }}
                         >
-                           ({t.category})
+                           ({t.category?.name})
                         </span>
                      </div>
                      <strong
