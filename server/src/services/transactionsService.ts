@@ -1,29 +1,39 @@
 import { prisma } from '@/config/db.js'
 
 export const transactionsService = {
-   getAll: async () => {
+   getAll: async (userId: string) => {
       return await prisma.transaction.findMany({
+         where: { userId },
+         include: {
+            category: true,
+         },
          orderBy: {
-         createdAt: 'desc',
+            date: 'desc',
          },
       })
    },
 
-   create: async (data: { title: string; amount: number; type: string; category: string; userId: string }) => {
+   create: async (data: { title: string; amount: number; type: string; categoryId: string; userId: string }) => {
       return await prisma.transaction.create({
          data: {
             title: data.title,
             amount: data.amount,
             type: data.type,
-            category: data.category,
+            categoryId: data.categoryId,
             userId: data.userId,
          },
+         include: {
+            category: true,
+         }
       })
    },
 
-   delete: async (id: string) => {
-      return await prisma.transaction.delete({
-         where: { id },
+   delete: async (id: string, userId: string) => {
+      return await prisma.transaction.deleteMany({
+         where: { 
+            id,
+            userId
+         },
       })
    },
 }
