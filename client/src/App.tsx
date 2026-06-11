@@ -3,6 +3,7 @@ import { Layout } from '@/components/Layout/Layout'
 import { Dashboard } from '@/pages/Dashboard/Dashboard'
 import { Transactions } from '@/pages/Transactions/Transactions'
 import { Auth } from '@/pages/Auth/Auth'
+import { Settings } from '@/pages/Settings/Settings'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { useDispatch } from 'react-redux'
 import type { AppDispatch } from './store'
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
    {
       path: '/auth',
       element: <Auth />,
+   },
+   {
+      path: '/settings',
+      element: <Settings />,
    },
 ])
 
