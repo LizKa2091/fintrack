@@ -10,10 +10,11 @@ export const settingsController = {
             return res.status(401).json({ error: 'Пользователь не авторизован' })
          }
 
-         const { username, currentPassword, newPassword } = req.body
+         const { username, currency, currentPassword, newPassword } = req.body
 
          const result = await settingsService.updateProfile(userId, {
             username,
+            currency,
             currentPassword,
             newPassword
          })
