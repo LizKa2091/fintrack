@@ -20,7 +20,7 @@ export const Layout = () => {
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                <Link to='/'>Главная</Link>
                <Link to='/transactions'>Транзакции</Link>
-
+               <Link to='/settings'>Настройки</Link>
                <span
                   onClick={handleLogout}
                   className={styles.logoutButton}

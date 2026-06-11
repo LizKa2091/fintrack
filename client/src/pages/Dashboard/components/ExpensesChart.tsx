@@ -1,4 +1,5 @@
 import { ResponsiveContainer, PieChart, Pie, Tooltip, Legend } from 'recharts'
+import { getCurrencySign } from '@/utils/currencySign.js'
 
 interface ChartData {
    category: string
@@ -8,11 +9,12 @@ interface ChartData {
 
 interface ExpensesChartProps {
    data: ChartData[]
+   userCurrency?: string
 }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF1975']
 
-export const ExpensesChart = ({ data }: ExpensesChartProps) => {
+export const ExpensesChart = ({ data, userCurrency = 'RUB' }: ExpensesChartProps) => {
    if (data.length === 0) {
       return (
          <div
@@ -51,7 +53,10 @@ export const ExpensesChart = ({ data }: ExpensesChartProps) => {
                <Tooltip
                   formatter={(value: unknown) => {
                      const numValue = Number(value) || 0
-                     return [`${numValue.toLocaleString()} ₽`, 'Сумма']
+                     return [
+                        `${numValue.toLocaleString()} ${getCurrencySign(userCurrency)}`,
+                        'Сумма',
+                     ]
                   }}
                   contentStyle={{
                      background: '#1e1e1e',

@@ -6,6 +6,7 @@ import {
    fetchTransactions,
 } from '@/store/slices/transactionsSlice'
 import { fetchCategories, createCategoryThunk } from '@/store/slices/categoriesSlice'
+import { getCurrencySign } from '@/utils/currencySign.js'
 import styles from './Transactions.module.scss'
 
 export const Transactions = () => {
@@ -19,6 +20,8 @@ export const Transactions = () => {
       total,
    } = useAppSelector((state) => state.transactions)
    const { items: categories } = useAppSelector((state) => state.categories)
+
+   const userCurrency = useAppSelector((state) => state.auth.user?.currency || 'RUB')
 
    const [title, setTitle] = useState('')
    const [amount, setAmount] = useState('')
@@ -37,15 +40,15 @@ export const Transactions = () => {
    }, [dispatch])
 
    const filteredCategories = useMemo(() => {
+      console.log(type)
       return categories.filter((c) => c.type === type)
    }, [categories, type])
 
-   const currentCategoryId = categoryId || (filteredCategories[0]?.id ?? '')
+   const activeCategoryId = categoryId || (filteredCategories[0]?.id ?? '')
 
    const handleTypeChange = (newType: 'income' | 'expense') => {
       setType(newType)
-      const nextCategories = categories.filter((c) => c.type === newType)
-      setCategoryId(nextCategories[0]?.id ?? '')
+      setCategoryId('')
    }
 
    const handleLoadMore = () => {
@@ -67,7 +70,7 @@ export const Transactions = () => {
 
    const handleTransactionSubmit = (e: React.FormEvent) => {
       e.preventDefault()
-      if (!title.trim() || !amount || Number(amount) <= 0 || !currentCategoryId) {
+      if (!title.trim() || !amount || Number(amount) <= 0 || !activeCategoryId) {
          alert('Пожалуйста, заполните все поля и выберите категорию')
          return
       }
@@ -77,7 +80,7 @@ export const Transactions = () => {
             title: title.trim(),
             amount: Number(amount),
             type,
-            categoryId: currentCategoryId,
+            categoryId: activeCategoryId,
          })
       )
 
@@ -124,7 +127,7 @@ export const Transactions = () => {
                   </div>
 
                   <div className={styles.inputGroup}>
-                     <label>Сумма (₽)</label>
+                     <label>Сумма ({getCurrencySign(userCurrency)})</label>
                      <input
                         type='number'
                         placeholder='0'
@@ -136,19 +139,48 @@ export const Transactions = () => {
 
                   <div className={styles.inputGroup}>
                      <label>Тип операции</label>
-                     <select
-                        value={type}
-                        onChange={(e) => handleTypeChange(e.target.value as 'income' | 'expense')}
-                     >
-                        <option value='expense'>Расход</option>
-                        <option value='income'>Доход</option>
-                     </select>
+                     <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
+                        <button
+                           type='button'
+                           onClick={() => handleTypeChange('expense')}
+                           style={{
+                              flex: 1,
+                              padding: '10px',
+                              borderRadius: '6px',
+                              border: '1px solid #ccc',
+                              backgroundColor: type === 'expense' ? '#ff4d4f' : '#fff',
+                              color: type === 'expense' ? '#fff' : '#333',
+                              fontWeight: type === 'expense' ? 'bold' : 'normal',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                           }}
+                        >
+                           Расход
+                        </button>
+                        <button
+                           type='button'
+                           onClick={() => handleTypeChange('income')}
+                           style={{
+                              flex: 1,
+                              padding: '10px',
+                              borderRadius: '6px',
+                              border: '1px solid #ccc',
+                              backgroundColor: type === 'income' ? '#4caf50' : '#fff',
+                              color: type === 'income' ? '#fff' : '#333',
+                              fontWeight: type === 'income' ? 'bold' : 'normal',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                           }}
+                        >
+                           Доход
+                        </button>
+                     </div>
                   </div>
 
                   <div className={styles.inputGroup}>
                      <label>Категория</label>
                      <select
-                        value={currentCategoryId}
+                        value={activeCategoryId}
                         onChange={(e) => setCategoryId(e.target.value)}
                         required
                      >
@@ -166,7 +198,7 @@ export const Transactions = () => {
                      </select>
                   </div>
 
-                  <button type='submit' className={styles.submitBtn} disabled={!currentCategoryId}>
+                  <button type='submit' className={styles.submitBtn} disabled={!categoryId}>
                      Добавить операцию
                   </button>
                </form>
@@ -258,7 +290,8 @@ export const Transactions = () => {
                            </div>
                            <div className={styles.cardRight}>
                               <span className={`${styles.amount} ${styles[t.type]}`}>
-                                 {t.type === 'income' ? '+' : '-'} {t.amount.toLocaleString()} ₽
+                                 {t.type === 'income' ? '+' : '-'} {t.amount.toLocaleString()}{' '}
+                                 {getCurrencySign(userCurrency)}
                               </span>
                               <button
                                  className={styles.deleteBtn}
