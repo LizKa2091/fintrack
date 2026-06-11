@@ -12,6 +12,8 @@ export const Settings = () => {
    const [isLoading, setIsLoading] = useState(false)
    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
+   const [currency, setCurrency] = useState('RUB')
+
    const handleUpdateProfile = async (e: React.FormEvent) => {
       e.preventDefault()
       setMessage(null)
@@ -26,6 +28,7 @@ export const Settings = () => {
       try {
          const response = await api.put('/auth/settings/profile', {
             username: username.trim() || undefined,
+            currency,
             currentPassword: currentPassword || undefined,
             newPassword: newPassword || undefined,
          })
@@ -72,6 +75,18 @@ export const Settings = () => {
                      />
                   </div>
                </section>
+
+               <hr className={styles.divider} />
+
+               <div className={styles.inputGroup}>
+                  <label>Основная валюта интерфейса</label>
+                  <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
+                     <option value='RUB'>Рубль (₽)</option>
+                     <option value='USD'>Доллар ($)</option>
+                     <option value='EUR'>Евро (€)</option>
+                     <option value='KZT'>Тенге (₸)</option>
+                  </select>
+               </div>
 
                <hr className={styles.divider} />
 

@@ -6,6 +6,7 @@ import {
    fetchTransactions,
 } from '@/store/slices/transactionsSlice'
 import { fetchCategories, createCategoryThunk } from '@/store/slices/categoriesSlice'
+import { getCurrencySign } from '@/utils/currencySign.js'
 import styles from './Transactions.module.scss'
 
 export const Transactions = () => {
@@ -19,6 +20,8 @@ export const Transactions = () => {
       total,
    } = useAppSelector((state) => state.transactions)
    const { items: categories } = useAppSelector((state) => state.categories)
+
+   const userCurrency = useAppSelector((state) => state.auth.user?.currency || 'RUB')
 
    const [title, setTitle] = useState('')
    const [amount, setAmount] = useState('')
@@ -124,7 +127,7 @@ export const Transactions = () => {
                   </div>
 
                   <div className={styles.inputGroup}>
-                     <label>Сумма (₽)</label>
+                     <label>Сумма ({getCurrencySign(userCurrency)})</label>
                      <input
                         type='number'
                         placeholder='0'
@@ -258,7 +261,8 @@ export const Transactions = () => {
                            </div>
                            <div className={styles.cardRight}>
                               <span className={`${styles.amount} ${styles[t.type]}`}>
-                                 {t.type === 'income' ? '+' : '-'} {t.amount.toLocaleString()} ₽
+                                 {t.type === 'income' ? '+' : '-'} {t.amount.toLocaleString()}{' '}
+                                 {getCurrencySign(userCurrency)}
                               </span>
                               <button
                                  className={styles.deleteBtn}

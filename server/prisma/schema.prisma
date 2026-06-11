@@ -1,5 +1,6 @@
 datasource db {
    provider = "postgresql"
+   url = "postgresql://postgres:root@localhost:5432/fintrack?schema=public"
 }
 
 generator client {
@@ -11,6 +12,7 @@ model User {
    email        String        @unique
    passwordHash String
    name         String?
+   currency     String        @default("RUB")
    createdAt    DateTime      @default(now())
    updatedAt    DateTime      @updatedAt
    transactions Transaction[]
