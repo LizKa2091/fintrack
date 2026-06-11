@@ -27,15 +27,15 @@ const router = createBrowserRouter([
             path: 'transactions',
             element: <Transactions />,
          },
+         {
+            path: '/settings',
+            element: <Settings />,
+         },
       ],
    },
    {
       path: '/auth',
       element: <Auth />,
-   },
-   {
-      path: '/settings',
-      element: <Settings />,
    },
 ])
 

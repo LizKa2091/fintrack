@@ -1,10 +1,18 @@
 import React, { useState } from 'react'
+import { useAppSelector, useAppDispatch } from '@/store/hooks'
+import { updateUser } from '@/store/slices/authSlice'
 import api from '@/api/axiosInstance.js'
 import styles from './Settings.module.scss'
 import axios from 'axios'
 
 export const Settings = () => {
-   const [username, setUsername] = useState('')
+   const dispatch = useAppDispatch()
+
+   const { user } = useAppSelector((state) => state.auth)
+
+   const [username, setUsername] = useState(() => user?.name || '')
+   const [currency, setCurrency] = useState(() => user?.currency || 'RUB')
+
    const [currentPassword, setCurrentPassword] = useState('')
    const [newPassword, setNewPassword] = useState('')
    const [confirmPassword, setConfirmPassword] = useState('')
@@ -34,6 +42,10 @@ export const Settings = () => {
          })
 
          setMessage({ type: 'success', text: response.data.message || 'Данные успешно обновлены!' })
+
+         if (response.data && response.data.user) {
+            dispatch(updateUser(response.data.user))
+         }
 
          setCurrentPassword('')
          setNewPassword('')

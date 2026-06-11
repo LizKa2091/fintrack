@@ -67,9 +67,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       res.status(200).json({
          token,
          user: {
-         id: user.id,
-         email: user.email,
-         name: user.name,
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            currency: user.currency,
          },
       })
    } 
@@ -94,6 +95,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
             id: true,
             email: true,
             name: true,
+            currency: true,
             createdAt: true
          }
       })

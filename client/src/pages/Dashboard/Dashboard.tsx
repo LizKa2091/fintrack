@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { getCurrencySign } from '@/utils/currencySign'
 import { fetchTransactions, selectExpensesByCategory } from '@/store/slices/transactionsSlice'
 import { ExpensesChart } from './components/ExpensesChart'
 import styles from './Dashboard.module.scss'
@@ -7,8 +8,13 @@ import styles from './Dashboard.module.scss'
 export const Dashboard = () => {
    const dispatch = useAppDispatch()
 
+   const { user } = useAppSelector((state) => state.auth)
    const { items: transactions, isLoading } = useAppSelector((state) => state.transactions)
    const categoriesData = useAppSelector(selectExpensesByCategory)
+
+   const displayName = user?.name || user?.email?.split('@')[0] || 'Пользователь'
+   const currency = user?.currency || 'RUB'
+   const currencySymbol = getCurrencySign(currency)
 
    useEffect(() => {
       dispatch(fetchTransactions({ page: 1, limit: 20 }))
@@ -43,19 +49,26 @@ export const Dashboard = () => {
 
    return (
       <div className={styles.wrapper}>
-         <h1>Панель управления</h1>
+         <header className={styles.welcomeHeader} style={{ marginBottom: '24px' }}>
+            <h1 style={{ fontSize: '2rem', fontWeight: '600', color: 'var(--text-main)' }}>
+               Привет, {displayName}!
+            </h1>
+            <p style={{ color: 'var(--text-muted)', marginTop: '4px' }}>
+               Вот актуальное состояние твоих финансов на сегодня.
+            </p>
+         </header>
 
          <div style={{ display: 'flex', gap: '20px', margin: '20px 0' }}>
             <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', flex: 1 }}>
                <h3>Доходы</h3>
                <p style={{ color: 'var(--success-color)', fontSize: '24px', fontWeight: 'bold' }}>
-                  +{totalIncome.toLocaleString()} ₽
+                  +{totalIncome.toLocaleString()} {currencySymbol}
                </p>
             </div>
             <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', flex: 1 }}>
                <h3>Расходы</h3>
                <p style={{ color: 'var(--error-color)', fontSize: '24px', fontWeight: 'bold' }}>
-                  -{totalExpense.toLocaleString()} ₽
+                  -{totalExpense.toLocaleString()} {currencySymbol}
                </p>
             </div>
          </div>
@@ -105,7 +118,7 @@ export const Dashboard = () => {
                                  <strong>{item.category}</strong> — {item.percentage}%
                               </span>
                               <span style={{ color: 'var(--text-muted)' }}>
-                                 {item.amount.toLocaleString()} ₽
+                                 {item.amount.toLocaleString()} {currencySymbol}
                               </span>
                            </div>
                            <div
@@ -169,7 +182,8 @@ export const Dashboard = () => {
                               t.type === 'income' ? 'var(--success-color)' : 'var(--error-color)',
                         }}
                      >
-                        {t.type === 'income' ? '+' : '-'} {t.amount.toLocaleString()} ₽
+                        {t.type === 'income' ? '+' : '-'} {t.amount.toLocaleString()}{' '}
+                        {currencySymbol}
                      </strong>
                   </li>
                ))}
