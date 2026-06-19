@@ -20,8 +20,6 @@ export const Settings = () => {
    const [isLoading, setIsLoading] = useState(false)
    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
-   const [currency, setCurrency] = useState('RUB')
-
    const handleUpdateProfile = async (e: React.FormEvent) => {
       e.preventDefault()
       setMessage(null)
