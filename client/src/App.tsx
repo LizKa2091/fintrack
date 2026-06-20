@@ -10,34 +10,39 @@ import type { AppDispatch } from './store'
 import { useEffect } from 'react'
 import { checkAuth } from './store/slices/authSlice'
 
-const router = createBrowserRouter([
+const router = createBrowserRouter(
+   [
+      {
+         path: '/',
+         element: (
+            <ProtectedRoute>
+               <Layout />
+            </ProtectedRoute>
+         ),
+         children: [
+            {
+               index: true,
+               element: <Dashboard />,
+            },
+            {
+               path: 'transactions',
+               element: <Transactions />,
+            },
+            {
+               path: 'settings',
+               element: <Settings />,
+            },
+         ],
+      },
+      {
+         path: 'auth',
+         element: <Auth />,
+      },
+   ],
    {
-      path: '/',
-      element: (
-         <ProtectedRoute>
-            <Layout />
-         </ProtectedRoute>
-      ),
-      children: [
-         {
-            index: true,
-            element: <Dashboard />,
-         },
-         {
-            path: 'transactions',
-            element: <Transactions />,
-         },
-         {
-            path: '/settings',
-            element: <Settings />,
-         },
-      ],
-   },
-   {
-      path: '/auth',
-      element: <Auth />,
-   },
-])
+      basename: import.meta.env.VITE_BASE_URL,
+   }
+)
 
 export const App = () => {
    const dispatch = useDispatch<AppDispatch>()
